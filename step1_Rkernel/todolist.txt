@@ -1,0 +1,1 @@
+check why closedPrice are zero in last obs
