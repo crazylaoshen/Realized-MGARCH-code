@@ -119,6 +119,6 @@ bandwidth = options.bandwidth;
 %         otherwise
 %             error('OPTIONS.KERNEL must be one of the listed types.')
 %     end
-else
-    weights=[];
+% else
+%     weights=[];
 end
