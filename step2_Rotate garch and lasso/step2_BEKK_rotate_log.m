@@ -56,19 +56,17 @@ A_true = PP*A*inv(MM);
 InovationMat = A*A'
 intercept = eye(K)-InovationMat-SmoothMat;
 
-[L,m , logRH] = rbekk_likelihood_rotate(theta_hat,e,RRK);
+[L, m, logRH] = rbekk_likelihood_rotate(theta_hat,e,RRK);
 L = -L;
 
 for t=1:T
 logH(:,:,t)=PP*logRH(:,:,t)*PP';
 end
-% In estimation  Q(t) = { Shat*(1-alpha-beta) + alpha*y(t-1,:)'*y(t-1,:) + beta*Q{t-1} };
-%   R = sqrt(diag(diag(Q{t})));
-%   Gamma(t) = { inv(R)*Q{t}*inv(R) };
+
 savefile = 'theta_hat.mat';
 save(savefile, 'theta_hat');
-% savefile = 'H.mat';
-% save(savefile, 'H');
+savefile = 'H.mat';
+save(savefile, 'H');
 savefile = 'B_tilde.mat';
 save(savefile, 'B');
 savefile = 'B.mat';

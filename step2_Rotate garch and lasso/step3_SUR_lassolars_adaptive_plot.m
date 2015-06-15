@@ -1,16 +1,14 @@
 clc;
 clear; close all;
-load('logH.mat');
+load('H.mat');
 load('logRK.mat');
 
-%
-% [K,~,T]= size(RK);
-% logRK = zeros(K,K,T);
-% for t=1:T
-% logRK(:,:,t)=logm(RK(:,:,t));
-% end
+[K,~,T]= size(H);
+logH = zeros(K,K,T);
+for t=1:T
+logH(:,:,t)=logm(H(:,:,t));
+end
 
-[K,~,T] = size(logH);
 p = K*(K+1)/2;
 h_vech = zeros(K*(K+1)/2,T);
 RK_vech = zeros(K*(K+1)/2,T);
@@ -35,8 +33,8 @@ d(d == 0) = 1;
 X = X./(ones(T,1)*d);
 
 
-s = 1;  % choose the eqation 
-    y = RK_vech(s,:)';
+s = 1;  % choose the first eqation to draw the graph 
+    y = RK_vech(1,:)';
     y = y-mean(y);
     betaOLS = (X'*X)\X'*y;
     G = X.*(ones(T,1)*abs(betaOLS'));
@@ -46,9 +44,9 @@ s = 1;  % choose the eqation
 
 %     betastar = beta(:,bestAIdx);
 %     betaHat(:,s) = betastar.*abs(betaOLS);
-
-beta = beta.*(abs(betaOLS)*ones(1,56));
-beta = beta./(d'*ones(1,56));
+n = length(beta);
+beta = beta.*(abs(betaOLS)*ones(1,n));
+beta = beta./(d'*ones(1,n));
 betaOLS = betaOLS./d';
 betaAIC = beta(:,bestAIdx);
 betaBIC = beta(:,bestBIdx);
@@ -57,6 +55,7 @@ LB = info.s(bestBIdx);
 
 figure
 plot(info.s,beta');
+xlim([0 1])
 hold on
 plot([LA LA],[-1 1.5],':m','LineWidth',5);
 plot([LB LB],[-1 1.5],'-b','LineWidth',5);
@@ -68,6 +67,7 @@ title('Lasso shrinkage of coefficients')
 
 figure(2)
 stairs(info.s,info.df,'-*b');
+xlim([0 1])
 hold on
 plot([LA LA],[0 60],':m','LineWidth',5);
 plot([LB LB],[0 60],'-b','LineWidth',5);
@@ -79,6 +79,7 @@ title('Degree of freedom shrinkage')
 
 figure(3)
 plot(info.s, info.mse)
+xlim([0 1])
 hold on
 plot([LA LA],[0.2 0.7],':m','LineWidth',5);
 plot([LB LB],[0.2 0.7],'-b','LineWidth',5);
@@ -89,3 +90,6 @@ title('Mean Squared Error of ALASSO')
 
 ['RSS of OLS  ',  '  RSS of AIC based','  RSS of BIC based']
 [info.rss(p)    info.rss(bestAIdx)        info.rss(bestBIdx)]
+
+['MSE of OLS  ',  '  MSE of AIC based','  MSE of BIC based']
+[info.mse(p)    info.mse(bestAIdx)        info.mse(bestBIdx)]

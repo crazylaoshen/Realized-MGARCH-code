@@ -1,14 +1,14 @@
 clc;
 clear;
-load('logH.mat');
+load('H.mat');
 load('logRK.mat');
 
-%
-% [K,~,T]= size(RK);
-% logRK = zeros(K,K,T);
-% for t=1:T
-% logRK(:,:,t)=logm(RK(:,:,t));
-% end
+[K,~,T]= size(H);
+logH = zeros(K,K,T);
+for t=1:T
+logH(:,:,t)=logm(H(:,:,t));
+end
+clear H;
 
 [K,~,T] = size(logH);
 p = K*(K+1)/2;
@@ -33,12 +33,7 @@ X = X - ones(T,1)*mean(X);
 d = sqrt(sum(X.^2));
 d(d == 0) = 1;
 X = X./(ones(T,1)*d);
-% lambda_min = 0;
-% lambda_max = 6;
-% nlambda = 60;
-% lambda_vec = linspace(lambda_min, lambda_max, nlambda);
-% kfold = 10;
-% lambda = zeros(K*(K+1)/2,1);
+
 tic
 for s = 1:(K*(K+1)/2);
     y = RK_vech(s,:)';

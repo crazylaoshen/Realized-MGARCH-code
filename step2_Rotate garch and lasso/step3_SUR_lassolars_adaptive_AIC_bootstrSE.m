@@ -1,14 +1,14 @@
 clc;
 clear;
-load('logH.mat');
+load('H.mat');
 load('logRK.mat');
 
-%
-% [K,~,T]= size(RK);
-% logRK = zeros(K,K,T);
-% for t=1:T
-% logRK(:,:,t)=logm(RK(:,:,t));
-% end
+[K,~,T]= size(H);
+logH = zeros(K,K,T);
+for t=1:T
+logH(:,:,t)=logm(H(:,:,t));
+end
+clear H;
 
 [K,~,T] = size(logH);
 p = K*(K+1)/2;
@@ -26,6 +26,7 @@ end
 
 betaHat = zeros(K*(K+1)/2,K*(K+1)/2);
 betaOLS = zeros(K*(K+1)/2,K*(K+1)/2);
+AICse = zeros(K*(K+1)/2,K*(K+1)/2);
 
 X = h_vech';
 % normalize X
@@ -51,31 +52,53 @@ for s = 1:(K*(K+1)/2);
 %     aa = sum(ind);
 %     XA = X(:,ind);
     betastar = beta(:,bestIdx);
-    betaHat(:,s) = betastar.*abs(betaOLS(:,s));
+% betastar = lassoBICse(G,y);
+    yfit = G*betastar;
+    resid = y - yfit;
     
-
+    AICse(:,s) = std(bootstrp(...
+         100,@(bootr)lassoAICse(G,yfit+bootr),resid))'.*(betaOLS(:,s)).^2;
+    
+    
+    betaHat(:,s) = betastar.*abs(betaOLS(:,s));
 end
 toc
 tauLARS = betaHat';
 tauLARS = tauLARS./(ones(p,1)*d);
-
+tauSE = AICse';
+tauSE = tauSE./(ones(p,1)*d.^2);
 tauOLS = betaOLS'./(ones(p,1)*d);
-% pmatrix = pvalue';
-tutu=sum(tauLARS~=0);
-'Percent of element being non-zero'
-pctzeros = sum(tutu)/numel(tauLARS)
-% savefile = 'tauLARS.mat';
-% save(savefile, 'tauLARS');
-% savefile = 'pvalue.mat';
-% save(savefile, 'pmatrix');
+
+
+
+
+% Overall Percent of element being non-zero
+pctAll = sum(sum(tauLARS~=0))/numel(tauLARS);
+
+%Row1: Percent of element being non-zero
+row1 = tauLARS(1,:)';
+tuRow1 = sum(row1~=0);
+pctRow1 = sum(tuRow1)/length(row1);
+
+savefile = 'AICse.mat';
+save(savefile, 'tauSE');
+
 
 'Diagonal element of tauhat '
 tu = diag(tauLARS)'
 'Mean of diagonal element'
 mean(tu)
-'Percent of diagonal element being non-zero'
-sum(tu~=0)/length(tu)
+% Diagonal :Percent of diagonal element being non-zero'
+pctDiag = sum(tu~=0)/length(tu);
 
+'Percent of element being non-zero'
+'||Overall ||  Row1  || Diag||'
+[pctAll, pctRow1, pctDiag]     
+
+% SE of row 1
+se1 = tauSE(1,:)';
+% SE of diagonal
+sed = diag(tauSE);
 
 
 
